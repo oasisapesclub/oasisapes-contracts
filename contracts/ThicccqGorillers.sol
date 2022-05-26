@@ -10,7 +10,7 @@ interface NannerWL {
     function decrementWL(address minter) external;
 }
 
-contract TestGorillers is ERC721Enumerable, Ownable {
+contract ThicccqGorillers is ERC721Enumerable, Ownable {
 
     event LevelChange(address indexed owner, uint256 indexed tokenId, uint256 indexed newLevel, uint256 oldLevel, uint256 timestamp);
     event MultiplierChange(address indexed owner, uint256 indexed tokenId, uint256 indexed newLevel, uint256 oldLevel, uint256 timestamp);
@@ -18,7 +18,7 @@ contract TestGorillers is ERC721Enumerable, Ownable {
     // MINT + COLLECTION DETAILS
     enum Batch { ONE, TWO, THREE }
     NannerWL NANNER_WHITELIST = NannerWL(0x49a670506377dfBe60bDA8214ac45f6840a92b3f);
-    uint256 public tokenPrice = 250 ether;
+    uint256 public tokenPrice = 300 ether;
     uint256 private mintMax = 10;
     uint256 public constant MAX_SUPPLY = 6666;
     uint256 public constant BATCH_MAX = 2222;
@@ -29,7 +29,7 @@ contract TestGorillers is ERC721Enumerable, Ownable {
     uint256 private constant BATCH_THREE_MIN = 4445;
     uint256 private constant BATCH_THREE_MAX = 6666;
     uint256 private constant TEAM_ALLOC_PER_BATCH = 50;
-    string private HIDDEN_BASE = "ipfs://";
+    string private HIDDEN_BASE = "ipfs://Qmd4XytXDuodknD4zCG9qyzzaFHPvTAeeYpP4aRZNa8pPN";
     bool public saleIsActive = false;
     bool public useWhitelist = false;
     mapping(Batch => bool) public batchSaleIsActive;
@@ -79,7 +79,7 @@ contract TestGorillers is ERC721Enumerable, Ownable {
 
     }
 
-    function mint(uint256 numTokens, Batch _batch, Type _type) public payable {
+    function mint(uint256 numTokens, Batch _batch, Type[] memory _type) public payable {
         if (msg.sender != owner()) {
             require(saleIsActive, "Mint not active.");
             require(batchSaleIsActive[_batch], "Batch minting disabled.");
@@ -89,9 +89,13 @@ contract TestGorillers is ERC721Enumerable, Ownable {
             if (useWhitelist) require(NANNER_WHITELIST.whitelistedCounts(msg.sender) > numTokens, "");
 
         }
-        if(_batch == Batch.ONE) require(_type == Type.FIRE || _type == Type.WATER);
-        if(_batch == Batch.TWO) require(_type == Type.EARTH || _type == Type.AIR);
-        if(_batch == Batch.THREE) require(_type == Type.LIGHTNING || _type == Type.NANNER);
+        
+        for (uint i = 0; i < _type.length;) {
+            if(_batch == Batch.ONE) {}require(_type[i] == Type.FIRE || _type[i] == Type.WATER);
+            if(_batch == Batch.TWO) require(_type[i] == Type.EARTH || _type[i] == Type.AIR);
+            if(_batch == Batch.THREE) require(_type[i] == Type.LIGHTNING || _type[i] == Type.NANNER);
+            unchecked {++i;}
+        }
 
         uint mintStartIndex = batchOffset[_batch] + batchMinted[_batch];
         for (uint i = mintStartIndex; i < numTokens + mintStartIndex;) {
@@ -100,7 +104,7 @@ contract TestGorillers is ERC721Enumerable, Ownable {
 
             gorillerLevel[i] = 1;
             gorillerMultiplier[i] = 1;
-            gorillerType[i] = _type;
+            gorillerType[i] = _type[i + 1 - batchOffset[_batch] - batchMinted[_batch]];
 
             _safeMint(msg.sender, i);
             unchecked { ++i; }
@@ -217,6 +221,14 @@ contract TestGorillers is ERC721Enumerable, Ownable {
 
     function setMintMax(uint256 _mintMax) external onlyOwner {
         mintMax = _mintMax;
+    }
+
+    function setBatchURI(string memory uri, Batch batch) external onlyOwner {
+        batchURI[batch] = uri;
+    }
+
+    function setHiddenURI(string memory uri) external onlyOwner {
+        HIDDEN_BASE = uri;
     }
 
     function flipUseWL() external onlyOwner {

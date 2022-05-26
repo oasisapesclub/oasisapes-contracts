@@ -2,9 +2,9 @@ const hre = require("hardhat");
 
 async function main() {
 
-  const TestGorillers = await hre.ethers.getContractFactory("TestGorillers");
-  const thicccqGoriller = await TestGorillers.deploy();
-  console.log("TestGorillers deployed to:", thicccqGoriller.address);
+  const ThicccqGorillers = await hre.ethers.getContractFactory("ThicccqGorillers");
+  const thicccqGoriller = await ThicccqGorillers.deploy();
+  console.log("ThicccqGorillers deployed to:", thicccqGoriller.address);
 
   await thicccqGoriller.deployed();
 
